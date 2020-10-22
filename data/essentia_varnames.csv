@@ -1,0 +1,18 @@
+colname,realname,shortname
+highlevel_moods_mirex_all_Cluster1,"Cluster (Mirex): 1 (Rousing, Passionate)",Moodcluster 1
+highlevel_moods_mirex_all_Cluster2,"Cluster (Mirex): 2 (Fun, Cheerful)",Moodcluster 2
+highlevel_moods_mirex_all_Cluster4,"Cluster (Mirex): 4 (Humorous, Witty)",Moodcluster 4
+highlevel_moods_mirex_all_Cluster5,"Cluster (Mirex): 5 (Aggressive, Intense)",Moodcluster 5
+highlevel_mood_aggressive_all_aggressive,Mood: Aggressive,Aggressive
+highlevel_mood_happy_all_happy,Mood: Happy,Happy
+highlevel_mood_party_all_party,Mood: Party,Party
+highlevel_mood_relaxed_all_relaxed,Mood: Relaxed,Relaxed
+highlevel_mood_sad_all_sad,Mood: Sad,Sad
+highlevel_mood_acoustic_all_acoustic,Sound: Acoustic,Acoustic
+lowlevel_average_loudness,Sound: Average Loudness,Loudness
+highlevel_danceability_all_danceable,Sound: Danceable,Danceable
+lowlevel_dissonance_mean,Sound: Dissonance,Dissonance
+lowlevel_dynamic_complexity,Sound: Dynamic complexity,Dynamic complexity
+highlevel_mood_electronic_all_electronic,Sound: Electronic,Electronic
+highlevel_voice_instrumental_all_instrumental,Sound: Instrumental,Instrumental
+highlevel_tonal_atonal_all_tonal,Sound: Tonal,Tonal
