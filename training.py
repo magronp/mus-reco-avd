@@ -8,7 +8,7 @@ import itertools
 from sklearn.preprocessing import scale
 from helpers.data_feeder import get_confidence, load_tp_data_as_csr
 from helpers.algos import factorize
-from helpers.metrics import normalized_dcg_at_k
+from helpers.metrics import my_ndcg
 import os
 os.environ['OMP_NUM_THREADS'] = '1'  # to not conflict with joblib
 
@@ -55,14 +55,17 @@ def train_val(params, content='nocontent'):
 
         # Cross validation with NDCG@k: faster than NDCG but yields similar results in terms of metric ordering
         print('NDCG on the validation set...')
-        aux_ndcg = normalized_dcg_at_k(train_data, vad_data, W, H, batch_users=params['batch_size'], k=100)
+        # Predict the ratings and compute the score
+        pred_ratings = W.dot(H.T)
+        aux = my_ndcg(vad_data, pred_ratings, batch_users=params['batch_size'], k=100, leftout_ratings=train_data)
+        ndcg_mean = aux[0]
         tot_time = time.time() - start_time
-        print("NDCG: %.5f ---- total time %.5f " % (aux_ndcg, tot_time))
+        print("NDCG: %.5f ---- total time %.5f " % (ndcg_mean, tot_time))
 
         # Check if the performance is better: save parameters
-        if aux_ndcg > opt_ndgc:
+        if ndcg_mean > opt_ndgc:
             np.savez(params['out_dir'] + 'wmf_' + content + '.npz', W=W, H=H, B=B, lambda_W=lW, lambda_H=lH)
-            opt_ndgc = aux_ndcg
+            opt_ndgc = ndcg_mean
 
 
 if __name__ == '__main__':

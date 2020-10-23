@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     # Load the TP data and filter out bad audio / non-ESSENTIA songs / inactive data
     print('Load Taste Profile data and filter non-ESSENTIA songs and bad audio...')
-    tp = tasteprofile.load_tp_remove_bad(data_dir)
+    tp = tasteprofile.load_tp(data_dir)
     tp = filter_tp_essentia(tp, data_dir=data_dir)
     tp = tasteprofile.filter_tp_inactive(tp, min_uc=MIN_USER_COUNT, min_sc=MIN_SONG_COUNT)[0]
 

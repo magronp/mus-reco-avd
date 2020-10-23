@@ -15,7 +15,12 @@ You will also need the pre-computed ESSENTIA data to extract the features, which
 All the files should be unziped (if needed) and placed in the `data/` folder.
 Note that you can change the folder structure, as long as you change the path accordingly in the code.
 
-Then, simply execute the `prepare_data.py` script to produce a handful of files (notably splitting the dataset into training, validation and test subsets).
+### Preprocessing the playcounts and features
+
+Once you're set, simply execute the `prepare_data.py` script to produce a handful of files (notably splitting the dataset into training, validation and test subsets).
+This will also extract the AVD features and create the corresponding split. 
+
+Note that by runing the script `helpers/extrac_features.py`, you can also obtain the factor loadings (Table 1 in the paper) and obtain the songs with maximum / minimum AVD values.
 
 
 ### Reproducing the experiments

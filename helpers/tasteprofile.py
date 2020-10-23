@@ -24,91 +24,20 @@ def get_count(tp, id):
     return count
 
 
-def get_song_info_from_sid(conn, sid):
-    cur = conn.cursor()
-    cur.execute("SELECT title, artist_name FROM songs WHERE song_id = '%s'" % (sid))
-    title, artist = cur.fetchone()
-    return title, artist
-
-
-def get_song_title_artist(md_dbfile, sid_list):
-
-    list_songs = []
-    with sqlite3.connect(os.path.join(md_dbfile)) as conn:
-        for sid in list(sid_list):
-            cur = conn.cursor()
-            cur.execute("SELECT title, artist_name FROM songs WHERE song_id = '%s'" % sid)
-            title, artist = cur.fetchone()
-            list_songs.append(title + ' BY ' + artist)
-
-    return list_songs
-
-
-def look_top_songs(data_dir, tp, songcount, n_topsongs=50):
-    md_dbfile = os.path.join(data_dir, 'track_metadata.db')
-    with sqlite3.connect(os.path.join(md_dbfile)) as conn:
-        for i in range(n_topsongs):
-            sid = songcount.index[i]
-            title, artist = get_song_info_from_sid(conn, sid)
-            print("%s BY %s -- count: %d" % (title, artist, songcount[i]))
-
-    playcount = tp[['sid', 'count']]
-    playcount_groupbysid = playcount.groupby('sid', as_index=False)
-    songcount = playcount_groupbysid.sum().sort_values('count', ascending=False)
-    print(songcount)
-    return
-
-
-# Visualize user and song counts and take a look at the top 50 most listened songs
-def visualize_histograms(usercount, songcount, n_bins=100):
-
-    usercount.hist(bins=n_bins)
-    songcount.hist(bins=n_bins)
-    songcount.sort_values(ascending=False, inplace=True)
-
-    return
-
-
-def load_tp_remove_bad(data_dir='data/'):
+def load_tp(data_dir='data/'):
 
     # Load Taste Profile data
     tp_file = os.path.join(data_dir, 'train_triplets.txt')
     tp = pd.read_table(tp_file, header=None, names=['uid', 'sid', 'count'])
-    '''
-    # Remove bad audio
-    msd_db_file = os.path.join(data_dir, 'track_metadata.db')
-    badaudio_file = os.path.join(data_dir, 'tracks_bad_audio.txt')
-    # Load the bad audio track id file
-    bad_audio = []
-    with open(badaudio_file, 'r') as f:
-        for line in f:
-            bad_audio.append(line.strip())
 
-        # Get the bad audio song id
-        bad_sid = []
-        conn = sqlite3.connect(msd_db_file)
-        for k in bad_audio:
-            myquery = "SELECT song_id FROM songs WHERE track_id='" + k + "'"
-            res = conn.execute(myquery)
-            data = res.fetchall()
-            bad_sid.append(data[0][0])
-        conn.close()
-
-        # Filter out the bad audio
-        tp = tp[~tp['sid'].isin(bad_sid)]
-    '''
     return tp
 
 
 def filter_tp_inactive(tp, min_uc=20, min_sc=50):
 
-    np.random.seed(98765)
-    n_users = 250000
-    n_songs = 25000
-
     # Only keep ratings >= 5, otherwise they're not informative.
     tp = tp[tp['count'] > 4]
-
+    '''
     # Keep top users (based on user counts)
     usercount = get_count(tp, 'uid')
     unique_uid = usercount.index
@@ -124,6 +53,7 @@ def filter_tp_inactive(tp, min_uc=20, min_sc=50):
     idx = np.random.choice(len(unique_sid), size=n_songs, replace=False, p=p_songs.tolist())
     unique_sid = unique_sid[idx]
     tp = tp[tp['sid'].isin(unique_sid)]
+    '''
 
     # Only keep the triplets for songs which were listened to by at least min_sc users, and at least min_sc times
     songcount = get_count(tp, 'sid')
@@ -147,7 +77,6 @@ def record_tp_data(tp, data_dir='data/'):
     n_songs = len(unique_sid)
 
     # Shuffle songs
-    np.random.seed(98765)
     idx = np.random.permutation(np.arange(n_songs))
     unique_sid = unique_sid[idx]
 
@@ -198,7 +127,6 @@ def split_tp(tp=None, unique_sid=None, data_dir='data/'):
     in_tp = tp[~tp['sid'].isin(out_sid)]
 
     # Pick out 20% of the rating for in-matrix prediction
-    np.random.seed(12345)
     n_ratings = in_tp.shape[0]
     test = np.random.choice(n_ratings, size=int(0.20 * n_ratings), replace=False)
     test_idx = np.zeros(n_ratings, dtype=bool)
@@ -207,7 +135,6 @@ def split_tp(tp=None, unique_sid=None, data_dir='data/'):
     train_tp = in_tp[~test_idx]
 
     # Pick out 10% of the (remaining) training rating as validation set
-    np.random.seed(13579)
     n_ratings = train_tp.shape[0]
     vad = np.random.choice(n_ratings, size=int(0.10 * n_ratings), replace=False)
     vad_idx = np.zeros(n_ratings, dtype=bool)
@@ -250,16 +177,11 @@ def numerize_tp(data_dir='data/'):
     return
 
 
-def prepare_whole_tp(min_uc=20, min_sc=50, data_dir='data/', visualization=False):
+def prepare_whole_tp(min_uc=20, min_sc=50, data_dir='data/'):
 
     # Load the TP data and filter out bad audio / inactive data
-    tp = load_tp_remove_bad(data_dir)
+    tp = load_tp(data_dir)
     tp, usercount, songcount = filter_tp_inactive(tp, min_uc=min_uc, min_sc=min_sc)
-
-    # Visualization of top songs and histograms of user/song counts
-    if visualization:
-        look_top_songs(data_dir, tp, songcount, n_topsongs=50)
-        visualize_histograms(usercount, songcount)
 
     # Record clean TP data and dictionaries
     unique_sid = record_tp_data(tp, data_dir=data_dir)
@@ -275,10 +197,13 @@ def prepare_whole_tp(min_uc=20, min_sc=50, data_dir='data/', visualization=False
 
 if __name__ == '__main__':
 
+    # Set random seed for reproducibility
+    np.random.seed(12345)
+
     MIN_USER_COUNT, MIN_SONG_COUNT = 20, 50
     data_dir = 'data/'
 
-    prepare_whole_tp(min_uc=MIN_USER_COUNT, min_sc=MIN_SONG_COUNT, data_dir=data_dir, visualization=False)
+    prepare_whole_tp(min_uc=MIN_USER_COUNT, min_sc=MIN_SONG_COUNT, data_dir=data_dir)
 
 
 # EOF

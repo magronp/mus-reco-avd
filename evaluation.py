@@ -3,7 +3,7 @@
 
 import json
 import numpy as np
-from helpers.metrics import normalized_dcg, normalized_dcg_out
+from helpers.metrics import my_ndcg, my_ndcg_out
 from helpers.algos import pure_content_recom
 from helpers.data_feeder import load_tp_data_as_csr
 import pandas as pd
@@ -27,12 +27,14 @@ def test_in_matrix(params, content='nocontent'):
     vad_data = load_tp_data_as_csr(os.path.join(params['data_dir'], 'in.vad.num.csv'), shape=(n_users, n_songs_in))[0]
     test_data = load_tp_data_as_csr(os.path.join(params['data_dir'], 'in.test.num.csv'), shape=(n_users, n_songs_in))[0]
 
-    # Load the WMF parameters
+    # Load the WMF parameters and estimate the ratings
     params_wmf = np.load(params['out_dir'] + 'wmf_' + content + '.npz')
     W, H = params_wmf['W'], params_wmf['H']
+    pred_ratings = W.dot(H.T)
 
     # Compute score
-    ndcg_mean, ndcg_std = normalized_dcg(train_data, test_data, W, H, batch_users=params['batch_size'], vad_data=vad_data)
+    ndcg_mean, ndcg_std = my_ndcg(test_data, pred_ratings, batch_users=params['batch_size'],
+                                  leftout_ratings=train_data + vad_data)
 
     return ndcg_mean, ndcg_std
 
@@ -50,6 +52,7 @@ def test_out_matrix(params, content='avd'):
     cols_test -= cols_test.min()
     test_data = sparse.csr_matrix((test_data.data, (rows_test, cols_test)), dtype=np.int16, shape=(n_users, n_songs_out))
 
+    # Predict the ratings
     if content == 'purecontent':
         pred_ratings = pure_content_recom(params)
     else:
@@ -62,14 +65,12 @@ def test_out_matrix(params, content='avd'):
         Z = Z[Z[:, 0].argsort()]
         Z = scale(np.delete(Z, 0, axis=1), axis=0)
 
-        # Compute song attributes for the out-of-matrix songs
+        # Compute song attributes for the out-of-matrix songs, and then predict the ratings
         H = np.matmul(Z, B)
-
-        # Predicted ratings
         pred_ratings = np.matmul(W, H.T)
 
     # Compute score
-    ndcg_mean, ndcg_std = normalized_dcg_out(test_data, pred_ratings, batch_users=params['batch_size'])
+    ndcg_mean, ndcg_std = my_ndcg_out(test_data, pred_ratings, batch_users=params['batch_size'])
 
     return ndcg_mean, ndcg_std
 
