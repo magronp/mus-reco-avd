@@ -1,6 +1,6 @@
 #  Content-aware music recommendation using the AVD model of musical preference
 
-This repository contains the code for reproducing the experiments in our paper entitled [Leveraging the structure of musical preference in content-aware music recommendation](https://arxiv.org/abs/2010.00392), published at the IEEE International Conference on Audio, Speech and Signal Processing (ICASSP) 2021.
+This repository contains the code for reproducing the experiments in our paper entitled [Leveraging the structure of musical preference in content-aware music recommendation](https://arxiv.org/abs/2010.10276), published at the IEEE International Conference on Audio, Speech and Signal Processing (ICASSP) 2021.
 
 ### Getting the data
 
