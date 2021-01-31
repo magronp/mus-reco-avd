@@ -20,7 +20,7 @@ Note that you can change the folder structure, as long as you change the path ac
 Once you're set, simply execute the `prepare_data.py` script to produce a handful of files (notably splitting the dataset into training, validation and test subsets).
 This will also extract the AVD features and create the corresponding split. 
 
-Note that by runing the script `helpers/extrac_features.py`, you can also obtain the factor loadings (Table 1 in the paper) and obtain the songs with maximum / minimum AVD values.
+Note that by runing the script `helpers/extract_features.py`, you can also obtain the factor loadings (Table 1 in the paper) and obtain the songs with maximum / minimum AVD values.
 
 
 ### Reproducing the experiments
